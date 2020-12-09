@@ -1,11 +1,18 @@
-from flask import Flask, jsonify, request
-from flask_marshmallow import Marshmallow
+from flask import Flask, jsonify, request, redirect
+
 from flask_restful import Api, Resource, reqparse
+
+from flask_marshmallow import Marshmallow
+
+from flask_admin import Admin, AdminIndexView, expose
+
+from flask_admin.contrib.sqla import ModelView
 
 from models import db, User, Contact
 
 UPLOAD_FOLDER = './upload'
 app = Flask(__name__)
+app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -43,7 +50,7 @@ class UserResource(Resource):
         db.session.add(user)
         db.session.commit()
         schema = UserSchema()
-        return schema.dump(user), 200
+        return schema.dump(user), 201
 
 
 class ContactResource(Resource):
@@ -56,14 +63,20 @@ class ContactResource(Resource):
 
         contacts = args['contact']
         for data in contacts:
-            contact = Contact()
-            print(data.get('name'))
-            contact.name = data.get('name')
-            contact.phone = data.get('phone')
-            contact.sender_name = args['name']
-            contact.sender_phone = args['phone']
-            db.session.add(contact)
-        db.session.commit()
+            contct = Contact.query.filter(
+                (Contact.sender_phone == args['phone']) & (Contact.phone == data.get('phone'))).first()
+            if contct:
+                if contct.name != data.get('name'):
+                    print("update")
+                    contct.name = data.get('name')
+            if not contct:
+                contact = Contact()
+                contact.name = data.get('name')
+                contact.phone = data.get('phone')
+                contact.sender_name = args['name']
+                contact.sender_phone = args['phone']
+                db.session.add(contact)
+            db.session.commit()
         return "Done", 201
 
 
@@ -81,7 +94,26 @@ def phon_contacts(phone):
     return {'data': schema.dump(contacts)}, 200
 
 
+class MyAdminIndexView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        return redirect('/users')
+
+
+class MyModeView(ModelView):
+    can_edit = True
+
+
+class UserModelView(MyModeView):
+    can_create = True
+
+
 if __name__ == '__main__':
+    admin = Admin(app, name='Caller ID',
+                  index_view=MyAdminIndexView(name=' '), url='/admin',
+                  template_mode='bootstrap3')
+    admin.add_view(UserModelView(User, db.session, url='/users'))
+    admin.add_view(ModelView(Contact, db.session))
     api.add_resource(UserResource, '/api/user/')
     api.add_resource(ContactResource, '/api/contact/')
     app.run(host='0.0.0.0', debug=True)
