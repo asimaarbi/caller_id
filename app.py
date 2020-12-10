@@ -82,7 +82,8 @@ class ContactResource(Resource):
 
 @app.route('/api/all/<phone>', methods=['GET'])
 def all(phone):
-    contacts = Contact.query.filter_by(phone=phone).all()
+    contacts = Contact.query.filter(Contact.sender_phone == phone).order_by(
+        Contact.date).all()
     user = User.query.filter_by(phone=phone).first()
     u_schema = UserSchema()
     c_schema = ContactSchema(many=True)
@@ -93,7 +94,8 @@ def all(phone):
 
 @app.route('/api/user_contacts/<phone>', methods=['GET'])
 def phon_contacts(phone):
-    contacts = Contact.query.filter_by(sender_phone=phone).all()
+    contacts = Contact.query.filter(Contact.sender_phone == phone).order_by(
+        Contact.date).all()
     schema = ContactSchema(many=True)
     return {'data': schema.dump(contacts)}, 200
 

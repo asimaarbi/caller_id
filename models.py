@@ -1,3 +1,5 @@
+from datetime import date
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -17,3 +19,4 @@ class Contact(db.Model):
     sender_phone = db.Column(db.String(50), nullable=True)
     name = db.Column(db.String(50), nullable=True)
     phone = db.Column(db.String(50), nullable=True)
+    date = db.Column(db.String(255), default=lambda: date.today())
