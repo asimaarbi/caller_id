@@ -39,7 +39,7 @@ class UserResource(Resource):
     def post(self):
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('name', type=str, help='Name', required=True)
-        parser.add_argument('phone', type=int, help='Phone', required=True)
+        parser.add_argument('phone', type=str, help='Phone', required=True)
         args = parser.parse_args()
         user = User.query.filter_by(phone=args['phone']).all()
         if user:
@@ -58,7 +58,7 @@ class ContactResource(Resource):
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('name', type=str, help='Name', required=True)
         parser.add_argument('contact', type=dict, help='Name', required=True, action='append')
-        parser.add_argument('phone', type=int, help='Phone must be int', required=True)
+        parser.add_argument('phone', type=str, help='Phone', required=True)
         args = parser.parse_args()
 
         contacts = args['contact']
