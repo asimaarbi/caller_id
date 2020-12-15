@@ -82,7 +82,7 @@ class ContactResource(Resource):
 
 @app.route('/api/all/<phone>', methods=['GET'])
 def all(phone):
-    contacts = Contact.query.filter(Contact.sender_phone == phone).order_by(
+    contacts = Contact.query.filter(Contact.phone == phone).order_by(
         Contact.date).all()
     user = User.query.filter_by(phone=phone).first()
     u_schema = UserSchema()
