@@ -110,16 +110,16 @@ class MyModeView(ModelView):
     can_edit = True
 
 
-class UserModelView(MyModeView):
-    can_create = True
+class ContactModelView(MyModeView):
+    column_searchable_list = ("phone",)
 
 
 if __name__ == '__main__':
     admin = Admin(app, name='Caller ID',
                   index_view=MyAdminIndexView(name=' '), url='/admin',
                   template_mode='bootstrap3')
-    admin.add_view(UserModelView(User, db.session, url='/users'))
-    admin.add_view(ModelView(Contact, db.session))
+    admin.add_view(MyModeView(User, db.session, url='/users'))
+    admin.add_view(ContactModelView(Contact, db.session))
     api.add_resource(UserResource, '/api/user/')
     api.add_resource(ContactResource, '/api/contact/')
     app.run(host='0.0.0.0', debug=True)
