@@ -112,6 +112,7 @@ class MyModeView(ModelView):
 
 class ContactModelView(MyModeView):
     column_searchable_list = ("phone",)
+    page_size = 100
 
 
 if __name__ == '__main__':
