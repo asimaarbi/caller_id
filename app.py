@@ -144,4 +144,4 @@ if __name__ == '__main__':
     admin.add_view(ContactModelView(Contact, db.session))
     api.add_resource(UserResource, '/api/user/')
     api.add_resource(ContactResource, '/api/contact/')
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0',  debug=False)
