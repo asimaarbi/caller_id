@@ -62,7 +62,6 @@ class ContactResource(Resource):
         args = parser.parse_args()
 
         contacts = args['contact']
-        print(contacts)
         db_contacts = Contact.query.filter_by(sender_phone=args['phone']).all()
         if not db_contacts:
             for data in contacts:
@@ -76,9 +75,7 @@ class ContactResource(Resource):
             return "Done", 201
 
         sanitized_contacts = {}
-        print("C", contacts)
         for c in contacts:
-            print(c)
             sanitized_contacts.update({c.get("phone"): c.get("name")})
 
         sanitized_db_contacts = {}
