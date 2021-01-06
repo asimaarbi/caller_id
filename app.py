@@ -62,14 +62,10 @@ class ContactResource(Resource):
         args = parser.parse_args()
 
         contacts = args['contact']
-        for data in contacts:
-            contct = Contact.query.filter(
-                (Contact.sender_phone == args['phone']) & (Contact.phone == data.get('phone'))).first()
-            if contct:
-                if contct.name != data.get('name'):
-                    print("update")
-                    contct.name = data.get('name')
-            if not contct:
+        print(contacts)
+        db_contacts = Contact.query.filter_by(sender_phone=args['phone']).all()
+        if not db_contacts:
+            for data in contacts:
                 contact = Contact()
                 contact.name = data.get('name')
                 contact.phone = data.get('phone')
@@ -77,6 +73,31 @@ class ContactResource(Resource):
                 contact.sender_phone = args['phone']
                 db.session.add(contact)
             db.session.commit()
+            return "Done", 201
+
+        sanitized_contacts = {}
+        print("C", contacts)
+        for c in contacts:
+            print(c)
+            sanitized_contacts.update({c.get("phone"): c.get("name")})
+
+        sanitized_db_contacts = {}
+        for c in db_contacts:
+            sanitized_db_contacts.update({c.phone: c})
+
+        for phone, name in sanitized_contacts.items():
+            if phone in sanitized_db_contacts:
+                contact = sanitized_db_contacts[phone]
+                contact.name = name
+            else:
+                new_contact = Contact()
+                new_contact.name = name
+                new_contact.phone = phone
+                new_contact.sender_name = args['name']
+                new_contact.sender_phone = args['phone']
+                db.session.add(new_contact)
+
+        db.session.commit()
         return "Done", 201
 
 
@@ -123,4 +144,4 @@ if __name__ == '__main__':
     admin.add_view(ContactModelView(Contact, db.session))
     api.add_resource(UserResource, '/api/user/')
     api.add_resource(ContactResource, '/api/contact/')
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
